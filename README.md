@@ -1,0 +1,2 @@
+# Submarine-safety-threat-detection
+Building a submarine safety system that detects underwater mines from sonar signatures to prevent catastrophic vessel loss. In this project we will compare machine learning classification algorithms (Logistic Regression, KNN, Naive Bayes,QDA,LDA) optimized for life-critical decisions where missing a single mine could sink a submarine. This project will employ cost-sensitive ML for asymmetric risk scenarios where different errors have vastly different consequences.
