@@ -1,0 +1,27 @@
+
+# --- IDE / Python junk ---
+.idea/
+**/.idea/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# --- notebooks ---
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+catboost_info/
+**/catboost_info/
+
+# --- virtualenvs ---
+venv/
+.venv/
+src/venv/
+
+# --- data + artifacts (rebuildable) ---
+data/interim/
+data/processed/
+artifacts/
+models/
+
+# --- archives ---
+*.zip
