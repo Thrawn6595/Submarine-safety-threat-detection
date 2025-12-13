@@ -16,18 +16,22 @@ def load_sonar_raw(
     """
     df = pd.read_csv(path, header=None)
 
-    df = assign_feature_and_outcome_names(
-        df,
-        outcome_col_index=outcome_col_index,
-        outcome_name="outcome",
-        feature_prefix="feature",
-    )
+    # Convert negative index (e.g., -1) to absolute
+    n_cols = df.shape[1]
+    if outcome_col_index < 0:
+        outcome_col_index = n_cols + outcome_col_index
+
+    # Rename columns directly (simple, no hidden logic)
+    new_cols = [f"feature_{i+1}" for i in range(n_cols)]
+    new_cols[outcome_col_index] = "outcome"
+    df.columns = new_cols
 
     if outcome_mapping is None:
         outcome_mapping = {"R": 0, "M": 1}
 
     df = map_outcome_to_int(df, outcome_col="outcome", mapping=outcome_mapping)
     return df
+
 
 
 def assign_feature_and_outcome_names(
