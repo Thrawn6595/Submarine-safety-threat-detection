@@ -4,7 +4,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from submarine_threat_detection.data import load_sonar_raw, split_train_val_test
+from submarine_threat_detection.data import load_sonar_raw, split_train_test
 from submarine_threat_detection.preprocessing import prepare_data_for_algorithm
 from submarine_threat_detection.train_utils import train_model_with_cv, create_cv_results_table
 from submarine_threat_detection.config import DEFAULT_SEED
@@ -15,9 +15,14 @@ def main():
     df = load_sonar_raw()
 
     # Sonar: last column is label
-    X_train, X_val, X_test, y_train, y_val, y_test = split_train_val_test(
-        df, target_col=-1, seed=DEFAULT_SEED
-    )
+    X_train, X_test, y_train, y_test = split_train_test(
+    df,
+    target_col="outcome",
+    test_size=0.2,
+    seed=DEFAULT_SEED,
+    stratify=True,
+)
+
 
     prepared = prepare_data_for_algorithm(X_train, X_val, X_test, y_train, y_val, y_test)
 
