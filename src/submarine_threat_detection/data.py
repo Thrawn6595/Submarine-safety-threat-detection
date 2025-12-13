@@ -12,31 +12,32 @@ def load_sonar_raw() -> pd.DataFrame:
     # sonar.csv is typically headerless: 60 features + 1 label col
     return pd.read_csv(path, header=None)
 
-def split_train_val_test(
+def split_train_test(
     df: pd.DataFrame,
-    target_col: int = SONAR_TARGET_COL,
+    target_col: str = "outcome",
     test_size: float = 0.2,
-    val_size: float = 0.2,
     seed: int = DEFAULT_SEED,
     stratify: bool = True,
 ):
-    y = df.iloc[:, target_col]
-    X = df.drop(df.columns[target_col], axis=1)
+    """
+    Train/Test split for small datasets.
+    CV will be run entirely inside TRAIN.
+    """
+    y = df[target_col]
+    X = df.drop(columns=[target_col])
 
     strat = y if stratify else None
 
-    X_train, X_tmp, y_train, y_tmp = train_test_split(
-        X, y, test_size=(test_size + val_size), random_state=seed, stratify=strat
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=test_size,
+        random_state=seed,
+        stratify=strat,
     )
 
-    rel_test = test_size / (test_size + val_size)
-    strat_tmp = y_tmp if stratify else None
+    return X_train, X_test, y_train, y_test
 
-    X_val, X_test, y_val, y_test = train_test_split(
-        X_tmp, y_tmp, test_size=rel_test, random_state=seed, stratify=strat_tmp
-    )
-
-    return X_train, X_val, X_test, y_train, y_val, y_test
 
 def assign_feature_and_outcome_names(
     df: pd.DataFrame,
