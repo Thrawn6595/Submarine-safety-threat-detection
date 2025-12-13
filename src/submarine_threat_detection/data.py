@@ -1,16 +1,56 @@
-from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from .config import DEFAULT_SEED, SONAR_TARGET_COL
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+from .config import DEFAULT_SEED
 
-def load_sonar_raw() -> pd.DataFrame:
-    path = DATA_DIR / "raw" / "sonar.csv"
-    if not path.exists():
-        raise FileNotFoundError(f"Missing raw sonar.csv at {path}")
-    # sonar.csv is typically headerless: 60 features + 1 label col
+
+def load_sonar_raw(path: str = "data/raw/sonar.csv") -> pd.DataFrame:
+    """
+    Load the raw sonar dataset (no headers in source file).
+    """
     return pd.read_csv(path, header=None)
+
+
+def assign_feature_and_outcome_names(
+    df: pd.DataFrame,
+    outcome_col_index: int,
+    outcome_name: str = "outcome",
+    feature_prefix: str = "feature",
+) -> pd.DataFrame:
+    """
+    Assign deterministic column names to a headerless dataframe.
+    """
+    df = df.copy()
+    n_cols = df.shape[1]
+
+    cols = []
+    for i in range(n_cols):
+        if i == outcome_col_index:
+            cols.append(outcome_name)
+        else:
+            cols.append(f"{feature_prefix}_{i + 1}")
+
+    df.columns = cols
+    return df
+
+
+def map_outcome_to_int(
+    df: pd.DataFrame,
+    outcome_col: str,
+    mapping: dict,
+) -> pd.DataFrame:
+    """
+    Map string outcome labels to integers using an explicit mapping.
+    """
+    df = df.copy()
+
+    unmapped = set(df[outcome_col].unique()) - set(mapping.keys())
+    if unmapped:
+        raise ValueError(f"Unmapped outcome values found: {unmapped}")
+
+    df[outcome_col] = df[outcome_col].map(mapping).astype(int)
+    return df
+
 
 def split_train_test(
     df: pd.DataFrame,
@@ -21,68 +61,17 @@ def split_train_test(
 ):
     """
     Train/Test split for small datasets.
-    CV will be run entirely inside TRAIN.
+    Cross-validation happens entirely inside TRAIN.
     """
     y = df[target_col]
     X = df.drop(columns=[target_col])
 
     strat = y if stratify else None
 
-    X_train, X_test, y_train, y_test = train_test_split(
+    return train_test_split(
         X,
         y,
         test_size=test_size,
         random_state=seed,
         stratify=strat,
     )
-
-    return X_train, X_test, y_train, y_test
-
-
-def assign_feature_and_outcome_names(
-    df: pd.DataFrame,
-    outcome_col_index: int,
-    outcome_name: str = "outcome",
-    feature_prefix: str = "feature",
-):
-    """
-    Assigns deterministic column names to a headerless dataframe.
-
-    Features: feature_1, feature_2, ...
-    Outcome: renamed explicitly (default: 'outcome')
-    """
-    df = df.copy()
-
-    n_cols = df.shape[1]
-    cols = []
-
-    for i in range(n_cols):
-        if i == outcome_col_index:
-            cols.append(outcome_name)
-        else:
-            cols.append(f"{feature_prefix}_{i + 1}")
-
-    df.columns = cols
-    return df
-
-def map_outcome_to_int(
-    df: pd.DataFrame,
-    outcome_col: str,
-    mapping: dict,
-):
-    """
-    Maps string outcome values to integers using an explicit mapping.
-    Example: {'R': 0, 'M': 1}
-    """
-    df = df.copy()
-
-    if outcome_col not in df.columns:
-        raise ValueError(f"Outcome column '{outcome_col}' not found")
-
-    unmapped = set(df[outcome_col].unique()) - set(mapping.keys())
-    if unmapped:
-        raise ValueError(f"Unmapped outcome values found: {unmapped}")
-
-    df[outcome_col] = df[outcome_col].map(mapping).astype(int)
-    return df
-
