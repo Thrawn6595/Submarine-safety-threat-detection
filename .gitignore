@@ -1,27 +1,29 @@
+# --- OS ---
+.DS_Store
 
-# --- IDE / Python junk ---
+# --- IDEs ---
 .idea/
-**/.idea/
+.vscode/
+
+# --- Python ---
 __pycache__/
-**/__pycache__/
-*.pyc
+*.py[cod]
 
-# --- notebooks ---
+# --- Jupyter ---
 .ipynb_checkpoints/
-**/.ipynb_checkpoints/
-catboost_info/
-**/catboost_info/
 
-# --- virtualenvs ---
+# --- CatBoost / training artifacts ---
+catboost_info/
+
+# --- Virtualenvs ---
 venv/
 .venv/
-src/venv/
 
-# --- data + artifacts (rebuildable) ---
+# --- Rebuildable outputs (keep folders, ignore contents) ---
 data/interim/
 data/processed/
 artifacts/
 models/
 
-# --- archives ---
+# --- Archives ---
 *.zip

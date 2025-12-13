@@ -113,15 +113,13 @@ def train_model_with_cv(
     param_grid: Dict[str, List[Any]],
     X_train: np.ndarray,
     y_train: np.ndarray,
-    # Kept args for backward compatibility; ignored in train_test_cv.
-    X_val: Optional[np.ndarray] = None,
-    y_val: Optional[np.ndarray] = None,
-    scoring: Any = F2_SCORER,
+    scoring: str = "f1",
     cv_folds: int = 5,
     seed: int = DEFAULT_SEED,
     fp_cost: float = 1.0,
     fn_cost: float = 5.0,
 ) -> CVRunResult:
+
     """
     Train + tune on TRAIN only using CV.
     Returns:
