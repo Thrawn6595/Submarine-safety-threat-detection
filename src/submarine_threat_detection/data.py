@@ -3,12 +3,31 @@ from sklearn.model_selection import train_test_split
 
 from .config import DEFAULT_SEED
 
+def load_sonar_raw(
+    path: str = "data/raw/sonar.csv",
+    outcome_col_index: int = -1,
+    outcome_mapping: dict | None = None,
+) -> pd.DataFrame:
+    """
+    Load sonar dataset and standardise schema:
+      - assign feature_1..feature_n
+      - rename target column to 'outcome'
+      - map outcome labels to ints (default: {'R': 0, 'M': 1})
+    """
+    df = pd.read_csv(path, header=None)
 
-def load_sonar_raw(path: str = "data/raw/sonar.csv") -> pd.DataFrame:
-    """
-    Load the raw sonar dataset (no headers in source file).
-    """
-    return pd.read_csv(path, header=None)
+    df = assign_feature_and_outcome_names(
+        df,
+        outcome_col_index=outcome_col_index,
+        outcome_name="outcome",
+        feature_prefix="feature",
+    )
+
+    if outcome_mapping is None:
+        outcome_mapping = {"R": 0, "M": 1}
+
+    df = map_outcome_to_int(df, outcome_col="outcome", mapping=outcome_mapping)
+    return df
 
 
 def assign_feature_and_outcome_names(
