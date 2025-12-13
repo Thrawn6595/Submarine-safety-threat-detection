@@ -37,3 +37,51 @@ def split_train_val_test(
     )
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+def assign_feature_and_outcome_names(
+    df: pd.DataFrame,
+    outcome_col_index: int,
+    outcome_name: str = "outcome",
+    feature_prefix: str = "feature",
+):
+    """
+    Assigns deterministic column names to a headerless dataframe.
+
+    Features: feature_1, feature_2, ...
+    Outcome: renamed explicitly (default: 'outcome')
+    """
+    df = df.copy()
+
+    n_cols = df.shape[1]
+    cols = []
+
+    for i in range(n_cols):
+        if i == outcome_col_index:
+            cols.append(outcome_name)
+        else:
+            cols.append(f"{feature_prefix}_{i + 1}")
+
+    df.columns = cols
+    return df
+
+def map_outcome_to_int(
+    df: pd.DataFrame,
+    outcome_col: str,
+    mapping: dict,
+):
+    """
+    Maps string outcome values to integers using an explicit mapping.
+    Example: {'R': 0, 'M': 1}
+    """
+    df = df.copy()
+
+    if outcome_col not in df.columns:
+        raise ValueError(f"Outcome column '{outcome_col}' not found")
+
+    unmapped = set(df[outcome_col].unique()) - set(mapping.keys())
+    if unmapped:
+        raise ValueError(f"Unmapped outcome values found: {unmapped}")
+
+    df[outcome_col] = df[outcome_col].map(mapping).astype(int)
+    return df
+
